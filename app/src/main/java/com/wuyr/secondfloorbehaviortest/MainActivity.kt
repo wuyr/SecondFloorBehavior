@@ -1,8 +1,13 @@
 package com.wuyr.secondfloorbehaviortest
 
 import android.os.Bundle
+import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.wuyr.secondfloorbehavior.SecondFloorBehavior
+import kotlinx.android.synthetic.main.act_main_view.*
 import java.util.*
+
 
 /**
  * @author wuyr
@@ -17,8 +22,25 @@ class MainActivity : AppCompatActivity() {
         init()
     }
 
-    private fun init() {
+    private lateinit var adapter: TextListAdapter
+    private lateinit var secondFloorBehavior: SecondFloorBehavior
 
+    private fun init() {
+        secondFloorView.adapter = ImageListAdapter(this)
+
+        adapter = TextListAdapter(this, getRandomData(18).toMutableList())
+        recyclerView.adapter = adapter
+        refreshLayout.setOnRefreshListener {
+            refreshLayout.postDelayed({
+                refreshLayout.isRefreshing = false
+                adapter.setData(*getRandomData(18))
+            }, 2000)
+        }
+        secondFloorBehavior = (secondFloorView.layoutParams as
+                CoordinatorLayout.LayoutParams).behavior as SecondFloorBehavior
+
+        secondFloorBehavior.setEnterAnimationInterpolator(DecelerateInterpolator())
+        secondFloorBehavior.setExitAnimationInterpolator(DecelerateInterpolator())
     }
 
     fun onEnterSecondFloor() {
@@ -27,6 +49,14 @@ class MainActivity : AppCompatActivity() {
 
     fun onExitSecondFloor() {
 
+    }
+
+    override fun onBackPressed() {
+        if (secondFloorBehavior.state == SecondFloorBehavior.STATE_OPENED) {
+            secondFloorBehavior.leaveSecondFloor()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     private val random = Random()
