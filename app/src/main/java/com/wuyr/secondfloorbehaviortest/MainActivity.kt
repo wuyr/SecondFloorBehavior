@@ -1,6 +1,8 @@
 package com.wuyr.secondfloorbehaviortest
 
+import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -19,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.act_main_view)
+        setupStatusBar()
         init()
     }
 
@@ -28,19 +31,33 @@ class MainActivity : AppCompatActivity() {
     private fun init() {
         secondFloorRecyclerView.adapter = ImageListAdapter(this)
 
-        adapter = TextListAdapter(this, getRandomData(18).toMutableList())
+        adapter = TextListAdapter(this, getRandomData(10).toMutableList())
         firstFloorRecyclerView.adapter = adapter
         refreshLayout.setOnRefreshListener {
             refreshLayout.postDelayed({
                 refreshLayout.isRefreshing = false
-                adapter.setData(*getRandomData(18))
-            }, 2000)
+                adapter.setData(*getRandomData(10))
+            }, 1000)
         }
+        //获取到Behavior实例
         secondFloorBehavior = (secondFloorView.layoutParams as
                 CoordinatorLayout.LayoutParams).behavior as SecondFloorBehavior
 
+        secondFloorBehavior.setOnStateChangeListener {
+            state.text = when (it) {
+                SecondFloorBehavior.STATE_NORMAL -> "静止"
+                SecondFloorBehavior.STATE_DRAGGING -> "拖动中"
+                SecondFloorBehavior.STATE_PREPARED -> "准备进入二楼"
+                SecondFloorBehavior.STATE_OPENING -> "正在进入二楼"
+                SecondFloorBehavior.STATE_OPENED -> "已进入二楼"
+                SecondFloorBehavior.STATE_CLOSING -> "正在退出二楼"
+                else -> ""
+            }
+        }
+
         secondFloorBehavior.setEnterAnimationInterpolator(DecelerateInterpolator())
         secondFloorBehavior.setExitAnimationInterpolator(DecelerateInterpolator())
+
     }
 
     fun onEnterSecondFloor() {
@@ -97,4 +114,13 @@ class MainActivity : AppCompatActivity() {
         "花逐雨中飘，曲随广陵散。感时知有恨，惜别悄无言。一身能负几重忧，人间没处可安排，念往事合应肠断。冷雨送斜阳，问几许兴亡恨，怕从野叟话桑田。如此好江山，别时容易见时难，回首依依无限怨。\n《李后主-去国归降》",
         "烟波江上使人愁，眼前尽是遗民泪，怕牵衣泣血问归旋。江山依然，痛皇业变迁。此去囚居宋土，难卜再复旋。不知哪一天，不知哪一天，复我山川。相看倍心酸，难禁丝丝血泪垂 偷眼望宋船 撩乱了方寸。广陵台殿已荒凉 吴苑宫帏今冷落 剩一程风雨送愁人 叹千里江山寒色远。\n《李后主-去国归降》"
     )
+
+    private fun setupStatusBar() {
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = resources.getColor(R.color.colorPrimaryDark)
+    }
 }
