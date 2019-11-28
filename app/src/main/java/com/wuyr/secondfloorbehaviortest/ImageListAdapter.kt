@@ -29,7 +29,7 @@ class ImageListAdapter(
         decode(R.drawable.ic_8), decode(R.drawable.ic_9),
         decode(R.drawable.ic_10), decode(R.drawable.ic_11),
         decode(R.drawable.ic_12), decode(R.drawable.ic_13),
-        decode(R.drawable.ic_14), decode(R.drawable.ic_1)
+        decode(R.drawable.ic_14), decode(R.drawable.ic_7)
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =

@@ -23,6 +23,7 @@ android {
     }
 }
 
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -36,5 +37,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    implementation 'com.wuyr:secondfloorbehavior:1.0.1'
+    implementation 'com.wuyr:secondfloorbehavior:1.0.2'
 }

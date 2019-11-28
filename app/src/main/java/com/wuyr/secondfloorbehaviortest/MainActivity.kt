@@ -26,10 +26,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var secondFloorBehavior: SecondFloorBehavior
 
     private fun init() {
-        secondFloorView.adapter = ImageListAdapter(this)
+        secondFloorRecyclerView.adapter = ImageListAdapter(this)
 
         adapter = TextListAdapter(this, getRandomData(18).toMutableList())
-        recyclerView.adapter = adapter
+        firstFloorRecyclerView.adapter = adapter
         refreshLayout.setOnRefreshListener {
             refreshLayout.postDelayed({
                 refreshLayout.isRefreshing = false
@@ -44,11 +44,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onEnterSecondFloor() {
-
+        progressBar.animate().alpha(0F).setDuration(secondFloorBehavior.enterDuration * 2).start()
     }
 
     fun onExitSecondFloor() {
-
+        progressBar.animate().alpha(1F).setDuration(secondFloorBehavior.exitDuration * 2).start()
     }
 
     override fun onBackPressed() {

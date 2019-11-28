@@ -6,28 +6,43 @@
     android:layout_height="match_parent">
 
     <!--头部View-->
-    <TextView
+    <ImageView
         android:id="@+id/headerView"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:background="@color/colorPrimary"
-        android:gravity="center"
-        android:text="@string/app_name"
-        android:textColor="@android:color/white"
-        android:textSize="28sp" />
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_6" />
 
     <!--二楼View-->
-    <androidx.recyclerview.widget.RecyclerView
+    <FrameLayout
         android:id="@+id/secondFloorView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_behavior="com.wuyr.secondfloorbehavior.SecondFloorBehavior"
         app:layout_dampingRatio="0.5"
         app:layout_onEnterSecondFloor="onEnterSecondFloor"
-        app:layout_onExitSecondFloor="onExitSecondFloor"
-        app:spanCount="2" />
+        app:layout_onExitSecondFloor="onExitSecondFloor">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/secondFloorRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2" />
+
+        <FrameLayout
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white">
+
+            <ProgressBar
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </FrameLayout>
 
     <!--一楼View-->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -44,7 +59,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+                android:id="@+id/firstFloorRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
