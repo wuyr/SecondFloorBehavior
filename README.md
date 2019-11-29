@@ -101,6 +101,6 @@ implementation 'com.wuyr:secondfloorbehavior:1.0.4'
 ### Demo下载: [app-debug.apk](https://github.com/wuyr/SecondFloorBehavior/raw/master/app-debug.apk)
 ### 库源码地址: <https://github.com/Ifxcyr/SecondFloorBehavior>
 
-### 效果图:
+### 效果图:（图片有点大，加载挺慢，可以安装上面的APK来查看）
 ![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview1.gif) ![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview2.gif)
 ![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview3.gif) ![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview4.gif)
