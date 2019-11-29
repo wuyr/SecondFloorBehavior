@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">PathLayoutManagerTest</string>
+    <string name="interpolator">插值器</string>
+    <string name="decelerate_interpolator">减速</string>
+    <string name="bounce_interpolator">回弹</string>
+    <string name="overshoot_interpolator">越界</string>
+    <string name="accelerate_decelerateInterpolator">加速减速</string>
+    <string name="enter_duration">进入动画时长</string>
+    <string name="exit_duration">退出动画时长</string>
+    <string name="damping_ratio">下拉衰减率</string>
+    <string name="idle">静止</string>
+    <string name="dragging">拖动中</string>
+    <string name="prepared">准备进入二楼</string>
+    <string name="opening">正在进入二楼</string>
+    <string name="opened">已进入二楼</string>
+    <string name="closing">正在退出二楼</string>
+</resources>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/interpolatorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/interpolator"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/interpolator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@+id/interpolatorText"
+        app:layout_constraintTop_toBottomOf="@+id/interpolatorText">
+
+        <RadioButton
+            android:id="@+id/accelerateDecelerate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/accelerate_decelerateInterpolator" />
+
+        <RadioButton
+            android:id="@+id/decelerate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/decelerate_interpolator" />
+
+        <RadioButton
+            android:id="@+id/bounce"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bounce_interpolator" />
+
+        <RadioButton
+            android:id="@+id/overshoot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/overshoot_interpolator" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/enterDurationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/enter_duration"
+        app:layout_constraintBottom_toBottomOf="@+id/enterDuration"
+        app:layout_constraintEnd_toStartOf="@+id/enterDuration"
+        app:layout_constraintStart_toStartOf="@+id/interpolator"
+        app:layout_constraintTop_toBottomOf="@+id/interpolator" />
+
+    <SeekBar
+        android:id="@+id/enterDuration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:max="3000"
+        android:padding="4dp"
+        android:progress="500"
+        app:layout_constraintEnd_toEndOf="@+id/enterDurationText"
+        app:layout_constraintStart_toEndOf="@+id/enterDurationTitle"
+        app:layout_constraintTop_toTopOf="@+id/enterDurationTitle" />
+
+    <TextView
+        android:id="@+id/enterDurationText"
+        android:layout_width="48dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="500"
+        app:layout_constraintBottom_toBottomOf="@+id/enterDuration"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/enterDuration"
+        app:layout_constraintTop_toTopOf="@+id/enterDuration" />
+
+    <TextView
+        android:id="@+id/exitDurationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="@string/exit_duration"
+        app:layout_constraintBottom_toBottomOf="@+id/exitDuration"
+        app:layout_constraintEnd_toStartOf="@+id/exitDuration"
+        app:layout_constraintStart_toStartOf="@+id/enterDurationTitle"
+        app:layout_constraintTop_toBottomOf="@+id/enterDurationTitle" />
+
+    <SeekBar
+        android:id="@+id/exitDuration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="3000"
+        android:padding="4dp"
+        android:progress="400"
+        app:layout_constraintEnd_toEndOf="@+id/exitDurationText"
+        app:layout_constraintStart_toEndOf="@+id/exitDurationTitle"
+        app:layout_constraintTop_toTopOf="@+id/exitDurationTitle" />
+
+    <TextView
+        android:id="@+id/exitDurationText"
+        android:layout_width="48dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="400"
+        app:layout_constraintBottom_toBottomOf="@+id/exitDuration"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/exitDuration"
+        app:layout_constraintTop_toTopOf="@+id/exitDuration" />
+
+    <TextView
+        android:id="@+id/dampingRatioTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="@string/damping_ratio"
+        app:layout_constraintBottom_toBottomOf="@+id/dampingRatio"
+        app:layout_constraintEnd_toStartOf="@+id/dampingRatio"
+        app:layout_constraintStart_toStartOf="@+id/exitDurationTitle"
+        app:layout_constraintTop_toBottomOf="@+id/exitDurationTitle" />
+
+    <SeekBar
+        android:id="@+id/dampingRatio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:max="100"
+        android:padding="4dp"
+        android:progress="50"
+        app:layout_constraintEnd_toStartOf="@+id/dampingRatioText"
+        app:layout_constraintStart_toEndOf="@+id/dampingRatioTitle"
+        app:layout_constraintTop_toTopOf="@+id/dampingRatioTitle" />
+
+    <TextView
+        android:id="@+id/dampingRatioText"
+        android:layout_width="48dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="0.5"
+        app:layout_constraintBottom_toBottomOf="@+id/dampingRatio"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/dampingRatio"
+        app:layout_constraintTop_toTopOf="@+id/dampingRatio" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

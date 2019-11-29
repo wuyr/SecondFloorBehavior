@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">SecondFloorBehaviorTest</string>
+    <string name="interpolator">Interpolator</string>
+    <string name="decelerate_interpolator">Decelerate</string>
+    <string name="bounce_interpolator">Bounce</string>
+    <string name="overshoot_interpolator">Overshoot</string>
+    <string name="accelerate_decelerateInterpolator">AccelerateDecelerate</string>
+    <string name="enter_duration">Enter Duration</string>
+    <string name="exit_duration">Exit Duration</string>
+    <string name="damping_ratio">Damping Ratio</string>
+    <string name="idle">Idle</string>
+    <string name="dragging">Dragging</string>
+    <string name="prepared">Prepared</string>
+    <string name="opening">Opening</string>
+    <string name="opened">Opened</string>
+    <string name="closing">Closing</string>
 </resources>

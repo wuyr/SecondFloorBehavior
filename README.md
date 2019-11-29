@@ -5,7 +5,7 @@
 ### 使用方式:
 #### 添加依赖:
 ```
-implementation 'com.wuyr:secondfloorbehavior:1.0.2'
+implementation 'com.wuyr:secondfloorbehavior:1.0.4'
 ```
 
 ### APIs:
@@ -13,7 +13,7 @@ implementation 'com.wuyr:secondfloorbehavior:1.0.2'
 |---------|-------------|
 |enterSecondFloor()|主动进入二楼|
 |leaveSecondFloor()|主动退出二楼|
-|getState()|获取当前状态：<br/>**STATE_NORMAL**: 普通状态<br/>**STATE_OPENING**: 正在进入二楼<br/>**STATE_OPENED**: 在二楼<br/>**STATE_CLOSING**: 正在离开二楼|
+|getState()|获取当前状态：<br/>**STATE_NORMAL**: 普通状态<br/>**STATE_DRAGGING**: 拖动中<br/>**STATE_PREPARED**: 符合触发进入二楼的条件<br/>**STATE_OPENING**: 正在进入二楼<br/>**STATE_OPENED**: 在二楼<br/>**STATE_CLOSING**: 正在离开二楼|
 |setStartInterceptDistance(float distance)|设置开始拦截下拉的滑动距离<br/>即：列表滑动到顶后，往下拉多长距离可以开始触发二楼的下拉？|
 |setMinTriggerDistance(float distance)|设置能够进入二楼的滑动距离(从触发上面的二楼下拉后开始计算)<br/>即：拦截下拉后，至少还要继续往下滑动多长距离才能够触发进入二楼？|
 |setDampingRatio(float ratio)|设置触发下拉后的滑动距离衰减率<br/>取值范围: **0~1**，0: 无衰减|
@@ -98,7 +98,9 @@ implementation 'com.wuyr:secondfloorbehavior:1.0.2'
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 ```
 
-### Demo下载: 敬请期待。。。
+### Demo下载: [app-debug.apk](https://github.com/wuyr/SecondFloorBehavior/raw/master/app-debug.apk)
 ### 库源码地址: <https://github.com/Ifxcyr/SecondFloorBehavior>
 
 ### 效果图:
+![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview1.gif) ![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview2.gif)
+![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview3.gif) ![preview](https://github.com/wuyr/SecondFloorBehavior/raw/master/previews/preview4.gif)

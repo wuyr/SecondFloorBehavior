@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_image_list_view.view.*
-import kotlinx.android.synthetic.main.item_text_list_view.view.*
+import kotlinx.android.synthetic.main.item_image.view.*
+import kotlinx.android.synthetic.main.item_text.view.*
 
 /**
  * @author wuyr
@@ -30,8 +30,8 @@ class TextListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
         layoutInflater.inflate(
-            if (viewType == 0) R.layout.item_image_list_view2
-            else R.layout.item_text_list_view, parent, false
+            if (viewType == 0) R.layout.item_image
+            else R.layout.item_text, parent, false
         )
     )
 

@@ -1,14 +1,17 @@
 package com.wuyr.secondfloorbehaviortest
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.view.animation.DecelerateInterpolator
+import android.view.animation.*
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.GravityCompat
 import com.wuyr.secondfloorbehavior.SecondFloorBehavior
-import kotlinx.android.synthetic.main.act_main_view.*
-import java.util.*
+import kotlinx.android.synthetic.main.act_main.*
+import kotlinx.android.synthetic.main.layout_menu.*
 
 
 /**
@@ -20,100 +23,170 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.act_main_view)
+        setContentView(R.layout.act_main)
         setupStatusBar()
         init()
     }
 
     private lateinit var adapter: TextListAdapter
-    private lateinit var secondFloorBehavior: SecondFloorBehavior
+    private lateinit var behavior: SecondFloorBehavior
 
     private fun init() {
-        secondFloorRecyclerView.adapter = ImageListAdapter(this)
+        initRecyclerView()
+        initBehavior()
+        initRadioGroup()
+        initSeekBar()
 
-        adapter = TextListAdapter(this, getRandomData(10).toMutableList())
+        firstFloorView.openDrawer(GravityCompat.START)
+    }
+
+    fun onEnterSecondFloor() {
+        progressBar.animate().alpha(0F).setDuration(behavior.enterDuration * 2).start()
+    }
+
+    fun onExitSecondFloor() {
+        progressBar.animate().alpha(1F).setDuration(behavior.exitDuration * 2).start()
+    }
+
+    private fun initBehavior() {
+        //获取到Behavior实例
+        behavior = (secondFloorView.layoutParams as
+                CoordinatorLayout.LayoutParams).behavior as SecondFloorBehavior
+        //监听状态
+        behavior.setOnStateChangeListener {
+            state.text = when (it) {
+                SecondFloorBehavior.STATE_NORMAL -> getString(R.string.idle)
+                SecondFloorBehavior.STATE_DRAGGING -> getString(R.string.dragging)
+                SecondFloorBehavior.STATE_PREPARED -> getString(R.string.prepared)
+                SecondFloorBehavior.STATE_OPENING -> getString(R.string.opening)
+                SecondFloorBehavior.STATE_OPENED -> getString(R.string.opened)
+                SecondFloorBehavior.STATE_CLOSING -> getString(R.string.closing)
+                else -> ""
+            }
+        }
+        //如果正在刷新，就不允许进入二楼
+        behavior.setOnBeforeEnterSecondFloorListener { !refreshLayout.isRefreshing }
+    }
+
+    @SuppressLint("NewApi")
+    private fun initRadioGroup() {
+        interpolator.setOnCheckedChangeListener { _, checkedId ->
+            (when (checkedId) {
+                R.id.accelerateDecelerate -> AccelerateInterpolator()
+                R.id.decelerate -> DecelerateInterpolator()
+                R.id.bounce -> BounceInterpolator()
+                R.id.overshoot -> OvershootInterpolator()
+                else -> LinearInterpolator()
+            }).apply {
+                behavior.setEnterAnimationInterpolator(this)
+                behavior.setExitAnimationInterpolator(this)
+                behavior.setExitAnimationInterpolator(this)
+            }
+        }
+    }
+
+    private fun initSeekBar() {
+        object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                when (seekBar.id) {
+                    R.id.enterDuration -> {
+                        behavior.enterDuration = progress.toLong()
+                        enterDurationText.text = progress.toString()
+                    }
+                    R.id.exitDuration -> {
+                        behavior.exitDuration = progress.toLong()
+                        exitDurationText.text = progress.toString()
+                    }
+                    R.id.dampingRatio -> {
+                        (progress / 100F).let { if (it == 0F) .01F else it }.run {
+                            behavior.dampingRatio = this
+                            dampingRatioText.text = toString()
+                        }
+                    }
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+        }.run {
+            enterDuration.setOnSeekBarChangeListener(this)
+            exitDuration.setOnSeekBarChangeListener(this)
+            dampingRatio.setOnSeekBarChangeListener(this)
+        }
+    }
+
+    private fun initRecyclerView() {
+        secondFloorRecyclerView.adapter = ImageListAdapter(this)
+        adapter = TextListAdapter(this, data.toMutableList())
         firstFloorRecyclerView.adapter = adapter
         refreshLayout.setOnRefreshListener {
             refreshLayout.postDelayed({
                 refreshLayout.isRefreshing = false
-                adapter.setData(*getRandomData(10))
-            }, 1000)
+                adapter.setData(*data)
+            }, 2000)
         }
-        //获取到Behavior实例
-        secondFloorBehavior = (secondFloorView.layoutParams as
-                CoordinatorLayout.LayoutParams).behavior as SecondFloorBehavior
-
-        secondFloorBehavior.setOnStateChangeListener {
-            state.text = when (it) {
-                SecondFloorBehavior.STATE_NORMAL -> "静止"
-                SecondFloorBehavior.STATE_DRAGGING -> "拖动中"
-                SecondFloorBehavior.STATE_PREPARED -> "准备进入二楼"
-                SecondFloorBehavior.STATE_OPENING -> "正在进入二楼"
-                SecondFloorBehavior.STATE_OPENED -> "已进入二楼"
-                SecondFloorBehavior.STATE_CLOSING -> "正在退出二楼"
-                else -> ""
-            }
-        }
-
-        secondFloorBehavior.setEnterAnimationInterpolator(DecelerateInterpolator())
-        secondFloorBehavior.setExitAnimationInterpolator(DecelerateInterpolator())
-
-    }
-
-    fun onEnterSecondFloor() {
-        progressBar.animate().alpha(0F).setDuration(secondFloorBehavior.enterDuration * 2).start()
-    }
-
-    fun onExitSecondFloor() {
-        progressBar.animate().alpha(1F).setDuration(secondFloorBehavior.exitDuration * 2).start()
     }
 
     override fun onBackPressed() {
-        if (secondFloorBehavior.state == SecondFloorBehavior.STATE_OPENED) {
-            secondFloorBehavior.leaveSecondFloor()
+        if (firstFloorView.isDrawerOpen(GravityCompat.START)) {
+            firstFloorView.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+            if (behavior.state == SecondFloorBehavior.STATE_OPENED) {
+                behavior.leaveSecondFloor()
+            } else {
+                super.onBackPressed()
+            }
         }
     }
 
-    private val random = Random()
-
-    private fun getRandomData(count: Int) = Array(count) {
-        data[random.nextInt(data.size)]
-    }
-
-    private val data = arrayOf(
-        "不到园林，怎知春色如许？原来姹紫嫣红开遍，似这般都付与断井颓垣。良辰美景奈何天，赏心乐事谁家院？ 朝飞暮卷，云霞翠轩，雨丝风片，烟波画船。\n《牡丹亭-游园惊梦》",
-        "半遮面兒弄絳紗，暗飛桃紅泛赤霞。拾釵人會薄命花，釵貶洛陽價，落絮飛花辱了君清雅。\n《紫钗记-灯街拾翠》",
-        "鴛盟初訂莫相猜，便似金堅難破壞。任天荒地老，莫折此紫鸞釵。苦相思，能買不能賣。\n《紫钗记-花院盟香》",
-        "茫茫烟水觅芳踪，浅笑轻颦常入梦。烟疑粉坠，水像脂融，似叶扁舟幸得风吹送，喜见锦帆斜挂夕阳中，我是彩云卿是凤。今日天台有路，莫教雾蔽烟笼。虽是萍水相交，何忍化秋云春梦。\n《再世红梅记-观柳还琴》",
-        "好一朵芙蓉出水百花羞，眉似苏堤春晓柳，盈盈秋水，为何轻罩雾烟愁。嗟莫是坐月怨秦箫，抑或是倚风寒翠袖。\n《帝女花-树盟》",
-        "幽香一縷透輕紗，柳煙裙腰絲一把。翰墨有緣能相會，情苗愛葉早萌牙。一個是張儉無家，一個是雲英未嫁。拜過瑤池王母，為乞彩鳳隨鴉。相看無語各銷魂，禁不住心猿意馬。\n《紫钗记-花院盟香》",
-        "百里遥遥辞帝京，一路绵绵情愈永，记否招郎投夜馆，鬼丛姊妹不同情，我推衾欲抱如花影，你笑指镜湖江上月，问何必拨影撩形。三十日露宿风餐，一百次嗔郎任性。\n《再世红梅记-焦窗魂合》",
-        "春光满眼万花妍，三春景致何曾见。玉燕双双绕翠轩，蝶儿飞舞乐绵绵，乐绵绵，万花争吐艳。绿柳娇嫩，倚池畔随风曳展。心忧岁月变迁，一朝美艳化烟，叹春光易逝愁深牵。看牡丹亭畔，有花韆，且待我荡上东墙，唤取春回转。\n《牡丹亭-游园惊梦》",
-        "谢宫主玉手赐琼浆，好比月破蓬莱，云迷楚岫。甘露未为奇，玉杯宁足罕，最难得是眉目暗相投。彩凤有翠拥红遮，经已兰麝微闻，我未接葡萄，香先透。翘首望瑶池，天上有金童玉女，人间亦有凤侣莺俦。忽见含樟树，倚殿千年，怎得情如合抱仝长寿。\n《帝女花-树盟》",
-        "三千风雨满仙山，隐约现情帆。爱深渐疏淡任风吹散。绾结三生一朝分散。红楼孽满，梦己断厌尘寰。剩有泪痕，付与鹃雁。魂在故园，暂寄潇湘不散。看宝玉痛孤单，惨切唤魂还，天宫泣幽咽，人间空嗟叹。往事应了，爱恨怕翻。弦断再续，也觉空泛。\n《红楼梦-幻觉离恨天》",
-        "驚見閨秀桃紅暗泛。好似天際玄娘變幻。一笑回眸遞送秋波冷。託生風月壇。不差一絲間，定是玄女偷偷降落降落世間。化春鶯柳巷憐翠雁。失去廟堂夢裡顏，我夢覺常自嘆，痛泣孤單。\n《九天玄女》",
-        "落花满天蔽月光，借一杯附荐凤台上。帝女花带泪上香，愿丧生回谢爹娘。偷偷看，偷偷望，佢带泪带泪暗悲伤。我半带惊惶，怕驸马惜鸾凤配，不甘殉爱伴我临泉壤。\n《帝女花-香夭》",
-        "冷冷雪蝶临梅岭，曲中弦断香销劫后城，此日红阁有谁个悼崇祯，我灯昏梦醒哭祭茶亭；钗分玉碎想殉身归幽冥，帝后遗骸谁愿领。碧血积荒径。\n《帝女花-庵遇》",
-        "飘渺间往事如梦情难认。百劫重逢缘何埋旧姓，夫妻断了情，唉鸳鸯已定，烽烟已靖，我偷偷相试佢未吐真情令我惊。\n《帝女花-庵遇》",
-        "贮泪已一年，封存叁百日，尽在今时放，泣诉别离情。昭仁劫后血痕鲜，可怜梦觉剩空筵。空悼落花，不见如花影，难招紫玉魂，难随黄鹤去，估不到维摩观，便是你驻香庭。避世情难长孤另，轻寒夜拥梦难成。往日翠拥诸为千人敬。今日更无一个可叮咛。\n《帝女花-相认》",
-        "山残水剩痛兴亡，劫后重逢悲聚散。有梦回故苑，无泪哭余情。雨后帝花飘，我不死无以对先王，偷生更难以谢民百姓。不孝已难容，欺世更无可恕，我虽生人世上，但鬼录已登名。\n《帝女花-相认》",
-        "拾釵人從絕塞歸，墜釵人已移情去，歸來空抱恨，此恨永難翻。八千里路夢遙遙，壩陵橋畔柳絲絲，恍見夢中人，招手迎郎返。驚見賣釵人，釵未斷時情已斷，未溫前夢夢先殘。胡不念花院盟香，胡不念柳驛攀條，胡不念臨歧曾共鴛鴦盞。也應念紫陌天緣，也應念紅閨美眷，更有盟心句，寫在烏絲闌。\n《紫钗记-吞钗拒婚》",
-        "十郎喊句舊情淡，偷將紫釵空泣嘆，怨句負愛寡恩紅顏。夢斷香銷我痛不欲生，哭分飛釵燕不待我回還。吞釵寧玉碎。情已冷，郎決殉愛，願以死酬俗眼。\n《紫钗记-吞钗拒婚》",
-        "霧月夜抱泣落紅，險些破碎了燈釵夢。喚魂句頻頻喚句，卿須記取再重逢。嘆病染芳軀不禁搖動，重似望夫山半欹帶病容。千般話猶在未語中，深驚燕好皆變空。\n《紫钗记-剑合钗圆》",
-        "處處仙音飄飄送，暗驚夜臺露凍。愁共怨待向陰司控，聽風吹翠竹，昏燈照影印簾櫳。霧夜少東風，誰嗰扶飛柳絮？\n《紫钗记-剑合钗圆》",
-        "聞鐘鼓，郎就鳳凰筵，橫來白羽穿心箭，酸得我芳心碎盡步顛連。女子由來心眼淺，那禁她，金枝玉葉年年月月，依戀伴郎眠？妒酸風，怒滿了桃花雙臉。\n《紫钗记-节镇宣恩》",
-        "褪色桐棺露芳名，灯灭半浮纤丽影，疑是芳魂回柳舍，却缘是竹影乱花台，拜一拜棺中睡美人，避一避泉台新鬼恨，莫言咫尺是芳邻，须知阴阳如隔海。\n《再世红梅记-环佩魂归》",
-        "花魁恨，一语恼孤鸾。赏灯谁断风筝线，盘秋谁断并头莲。有千金难买还魂券，秋灯灭，难以再重燃。摧花负罪你当难免。\n《蝶影红梨记-宦游三错》",
-        "欲把舊調重複唱，弦驟斷難續上，碧天雲淡雨寒，天幡布陣有胭脂將，不納這癡心漢，憶倩女同墜愛網，登仙百念全喪，雙仙斜立兩旁，咫尺不願看，厭倦了塵俗相，化玄女依歸太上，塵俗客為你甘殉葬，曾付了相思賬，火劫鴛鴦，深深揖拜眾仙要念我狂。\n《九天玄女-於歸》",
-        "不见风雨魂兮夜半还，红楼残梦断，黄竹血迹斑。痴情误，怎料到接木移花害了绝代颜。痛惜枉有天生宋玉才，叹未能唤魄返，欲上天阙，再落泉下探，秋雨春风梦到潇湘冷，悼翠悲红情泪染花瓣，葬花人难留俗眼，生死不了情永在世间，未许化烟消云散。\n《红楼梦-幻觉离恨天》",
-        "三千风雨满仙山，隐约现情帆。爱深渐疏淡任风吹散。绾结三生一朝分散。红楼孽满，梦己断厌尘寰。剩有泪痕，付与鹃雁。魂在故园，暂寄潇湘不散。看宝玉痛孤单，惨切唤魂还，天宫泣幽咽，人间空嗟叹。往事应了，爱恨怕翻。弦断再续，也觉空泛。\n《红楼梦-幻觉离恨天》",
-        "乘龙夜醉挽嫦娥拜，再续断钗，不须惊恐怕浪怕风，残庐结婚越觉情浓。龙凤有烛，奴实有福，秋波偷偷送。虽四壁皆空，夫妻居于破巢亦胜深宫。\n《跨凤乘龙-鸾凤同巢》",
-        "十万横磨剑，宛似在目前，万众投鞭流可断，总不枉圣上归为臣虏强图存。当日申包胥，也遂存楚愿，深冀江南俊彦胜前贤。复国心急如弦上箭，壮怀激烈扣心弦。江南锦绣好江山，难容黩武穷兵占。\n《李后主-去国归降》",
-        "花逐雨中飘，曲随广陵散。感时知有恨，惜别悄无言。一身能负几重忧，人间没处可安排，念往事合应肠断。冷雨送斜阳，问几许兴亡恨，怕从野叟话桑田。如此好江山，别时容易见时难，回首依依无限怨。\n《李后主-去国归降》",
-        "烟波江上使人愁，眼前尽是遗民泪，怕牵衣泣血问归旋。江山依然，痛皇业变迁。此去囚居宋土，难卜再复旋。不知哪一天，不知哪一天，复我山川。相看倍心酸，难禁丝丝血泪垂 偷眼望宋船 撩乱了方寸。广陵台殿已荒凉 吴苑宫帏今冷落 剩一程风雨送愁人 叹千里江山寒色远。\n《李后主-去国归降》"
-    )
+    private var next = false
+    private val data: Array<String>
+        get() =
+            if (next) {
+                next = false
+                arrayOf(
+                    "（裴禹不由自主的冲口而叫白）姑娘...姑娘...（口古）姑娘，残桥在上，画船在下，恨芍药为烟雾所笼，帐芙蓉为垂杨所隔，能否请仙子降下云阶，待凡人默志芳容，归去焚香供奉。",
+                    "（慧娘口古）秀才郎，明月在天，青莲在地，既知明月高不可攀，何必潜落江心而思抱月呢，不若请秀才早归云馆，努力攻书，屏息万念，搏一点簪花状元红。（欲下介）",
+                    "（裴禹情急白）姑娘...（随意将琴放于垂杨下石趸之上，即向船而拜口古）姑娘，所谓缘份在天，邂逅由人，既拨柳而情愫暗通，何必吝啬芳容，陷我沉沦于绮梦呢。姑娘请下船...姑娘请下船...",
+                    "（慧娘口古）呆秀才，所谓祸福由天，拾取由人，请辨画船旗上帜，你都莫向佳人枉鞠躬。（裴禹不顾一切亦不视旗呼叫白）姑娘...姑娘你慢行...姑娘你慢行...",
+                    "（长二王下句）茫茫烟水觅芳踪，浅笑轻颦常入梦，烟疑粉坠，水像脂融，似叶扁舟幸得风吹送，喜见锦帆斜挂夕阳中，我是彩云卿是凤，今日天台有路，莫教雾蔽烟笼。虽是萍水相交，何忍化秋云春梦。（白）姑娘你若不下船，小生嘛...就长拜不止。（对船不停膜拜介）",
+                    "（慧娘觊状笑介欲行将回船又止步回望裴禹滚花下句）唉，镜花水月原是幻。（裴禹叫白）姑娘...姑娘... （慧娘意又不忍介续唱）但任教铁石为心也动容。（上岸）（裴禹见慧娘下船心中大喜忙躬身再下礼白）姑娘，小生有礼。 （慧娘又惊又喜介闪入柳阴下滚花上句）轻锁意马系心猿，借嫩柳深藏情万种。",
+                    "（裴禹唱蕉窗夜雨）惊艳女，含颦愁对春风，露半面挽玉带低弄娇羞态欲藏嫩柳中，似烟罩芙蓉，腮有泪溅玉容。（白）哎呀...常言仙子无愁，凡人有恨，问何以蓦地相逢，姑娘你...你腮边有泪... ",
+                    "（慧娘并不回答，急于回身拭泪）（裴禹续白）唉，嗟莫是柳外桃花逢雨劫，飘零落向画船中？",
+                    "（慧娘接唱）有个书生得解我悲痛，拂柳相对无语情半通，诗内寄意是怜爱还是暗讽，花飘泊万古也类同。（白）唉桃花雨劫是千古不移之例，飘向画船是因风不由自主，秀才渴欲一见，妾都不忍再敞其色，有违雅意。如此君愿巳偿，妾心都亦了，秀才你何不请回呢？",
+                    "（裴禹急白）姑娘，我抱琴而来，万不能空手而归架。（接唱）见否有绿琴物微缘份重。（慧娘接唱）恕此柳外人见琴难递送。（白）秀才，你既知琴在柳荫，又何必见而故问呢。",
+                    "（裴禹接唱）你既知我是醉翁，几翻欲语还自控，花到怒放谁户种，抑或闰女未嫁盼望有奇逢。（慧娘白）秀才，你何必明知故问呢？（裴禹白）下，我何曾知道呀。（慧娘接白）你既然有柳外桃花逢雨劫，飘零落向画船中之句，又点会唔知我既身世呢。",
+                    "（慧娘接唱）花劫断客梦，巳骤逢暴雨罡风，暗将诗句诵，湘女更动容，莫个叩芳踪，恼煞权臣太凶，负你惜花义勇。（裴禹接唱）愁闻弦断曲终，恨见面巳断碎春梦，若七仙女召回入太空，剩下追舟者被风揭断蓬。",
+                    "（慧娘接唱）你有意栽花潇洒更英勇，惜那花沾泥絮尘半封。（白）既卖之心，难以再为君赠啰。（裴禹接唱）唉，北地作客负才气寻觅爱宠，得见知音侣巳卖身困玉笼。（白）不朽之情，哀哀伏求卿鉴。",
+                    "（慧娘接）辜负伯牙琴。（裴禹接）泪巳难自控。（慧娘接）知音再复寻。（裴禹接）俗世才未众。",
+                    "（慧娘接唱）你看花在镜中，相思自惹遗恨痛，一切为我会能断送，休要慕我算是饶侬。（一路讲一路抱琴还与裴禹悲咽白）谢秀才情深，恕红颜薄命，一面之缘，请从此休，带泪还琴，请从此别，秀才请回，言尽于此矣。",
+                    "（裴禹接）相见非似梦，奈何别也空匆，叹丹山有凤，此后咫尺隔万重。（慧娘接）怯酸风，易惹无情剑锋，挥巾目送。",
+                    "（裴禹失望而行至石桥不禁几回眺望介滚花下句）唉，相如枉奏求凰调，岂料知音恨晚逢。伤心怒碎伯牙琴，（碎琴介）此后琴碎情亡只是留恨痛。（快快而行下介）"
+                )
+            } else {
+                next = true
+                arrayOf(
+                    "",
+                    "（排子头一句作上句起幕）（昭仁宫主什边柳荫上介台口滚花下句）凤彩门前灯千盏，扫尽深宫半月愁。愁云战雾罩南天，偏是凤台设下求凰酒。",
+                    "（白榄）前年父王喻礼部，替王姐长平择配偶。祇求身出官宦家，年华双十人俊秀。凤台千尺谁能攀，凤台枉设葡萄酒。有个周世显，才锦绣。礼部选之应凤徵，今夕凤台新试酒。环佩声传凤来仪，等闲谁敢轻咳嗽。",
+                    "（长平宫主小曲醉酒唱上）红牙低声奏，冷香侵凤楼，甘自寂寞看韶华溜。空对月夜岁老烧金兽，更添一段愁。求凰宴，莫设凤台难从浊里求。若是无缘怎生将就。",
+                    "（昭仁白）拜见王姐。（长平微笑白）昭仁二妹，我地姐妹之间应叙伦常，少行宫礼叻。（昭仁天真介口古）王姐，礼部选来一个你唔岩，两个又唔岩，王姐你独赏孤芳，恐怕终难寻偶。",
+                    "（长平笑介口古）唉二妹，我本无求偶之心，怎奈父王佢催粧有意，我话其实都系多馀既唧，正是千军容易得，一婿最难求。（半羞介白）内侍臣，与哀家传。（侍臣台口传旨介白）遵旨。呔，宫主有命，周世显朝见。",
+                    "（周锺伴周世显宫门打引上介）（世显台口诗白）孔雀灯开五凤楼。轻袍暖帽锦貂裘。敏捷当如曹子健，潇洒当如秦少游。（欲入介）（周锺一手拖世显另场白）喂，咪行住...咪行住...",
+                    "（滚花下句）喂...帝女花都不比宫墙柳，长平慧质殊少有，君王有事必与帝女谋，你叁生有幸得向裙前叩，切记凤台应对莫轻浮。难得云英今夕会裴航，你要一遍虔诚求柱扣。",
+                    "（世显一才窥望惊艳介白）哦，好一朵（秃头长二王下句）芙蓉出水百花羞，眉似苏堤春晓柳，盈盈秋水，为何轻罩雾烟愁。嗟莫是坐月怨秦箫，抑或是倚风寒翠袖。（上前跪介白）臣太仆左都尉之子周世显叩见宫主，愿宫主千千岁。",
+                    "（长平望也不望冷然口古）平身。（介）周世显，语云男儿膝下有黄金，你奈何折腰求凤侣，敢问士有百行，以何为首。",
+                    "（世显口古）宫主，所谓新入宫庭，当行宫礼，宫主是天下女子仪范，奈何出一语把天下男儿污辱，敢问女有四德，到底以边一样占先头呀？",
+                    "（长平重一才慢的的震怒依然不望冷笑口古）周世显，擅辞令者，都祇合游说于列国，倘若以辞令求偶于凤台，未见其诚，益增其丑咋。",
+                    "（世显绝不相让介口古）宫主，言语发自心声，辞令寄于学问，我虽无经天纬地之才，却有怜香惜玉意，可惜人不以真诚待我，我又何必以诚信相投呢。（周锺在旁怨世显傲慢介）",
+                    "（长平重一才慢的的回头见世显，惊其才貌，徐徐回笑白）哎呀...哦...酒来...（慢板唱下介）侍臣递过紫金瓯，翠盆香冷霓裳奏，借一杯琼浆玉液，谢适才语出轻浮。",
+                    "（世显接杯秃头中板）谢宫主玉手赐琼浆，好比月破蓬莱，云迷楚岫。甘露未为奇，玉杯宁足罕，最难得是眉目暗相投。彩凤有翠拥红遮，经已兰麝微闻，我未接葡萄，香先透。翘首望瑶池，天上有金童玉女，人间亦有凤侣莺俦。（滚花）忽见含樟树，倚殿千年，怎得情如合抱仝长寿。",
+                    "（周锺白）宫主。（二王下句）正是瑶池无俗客，凤台只配凤凰游。（序）老臣所荐可合心头。（曲）望宫主赐下一言，好待向君皇回奏。（序）未知佢雀屏能中否？"
+                )
+            }
 
     private fun setupStatusBar() {
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE

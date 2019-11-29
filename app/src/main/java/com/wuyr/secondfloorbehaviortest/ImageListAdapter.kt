@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_image_list_view.view.*
+import kotlinx.android.synthetic.main.item_image.view.*
 
 /**
  * @author wuyr
@@ -30,7 +30,7 @@ class ImageListAdapter(context: Context) : RecyclerView.Adapter<ImageListAdapter
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        ViewHolder(layoutInflater.inflate(R.layout.item_image_list_view, parent, false))
+        ViewHolder(layoutInflater.inflate(R.layout.item_image, parent, false))
 
     override fun getItemCount() = data.size
 
